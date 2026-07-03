@@ -1,11 +1,14 @@
 package guat.lxy.bigdata.keshe.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import guat.lxy.bigdata.keshe.entity.Category;
 import guat.lxy.bigdata.keshe.mapper.CategoryMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -19,6 +22,13 @@ public class CategoryService {
     private RedisTemplate<String, Object> redisTemplate;
 
     private static final String CATEGORY_LIST_KEY = "category:list";
+
+    // ★★★ 新增：分页查询 ★★★
+    public PageInfo<Category> findByPage(Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<Category> list = categoryMapper.findAll();
+        return new PageInfo<>(list);
+    }
 
     public List<Category> getAllCategories() {
         if (redisTemplate != null) {

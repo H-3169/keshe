@@ -1,5 +1,6 @@
 package guat.lxy.bigdata.keshe.controller;
 
+import com.github.pagehelper.PageInfo;
 import guat.lxy.bigdata.keshe.entity.Category;
 import guat.lxy.bigdata.keshe.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,13 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping("/list")
-    public String list(Model model) {
-        model.addAttribute("categories", categoryService.getAllCategories());
+    public String list(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "5") Integer pageSize,
+            Model model) {
+
+        PageInfo<Category> pageInfo = categoryService.findByPage(pageNum, pageSize);
+        model.addAttribute("pageInfo", pageInfo);
         return "category/list";
     }
 

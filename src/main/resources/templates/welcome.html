@@ -2,6 +2,10 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <!-- ★ 禁用所有缓存 ★ -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>欢迎</title>
     <style>
         body {
@@ -22,9 +26,45 @@
 </head>
 <body>
 <div class="box">
-    <h2> 欢迎登录 <span>智慧商品</span>信息管理系统</h2>
+    <h2>👋 欢迎登录 <span>智慧商品</span>信息管理系统</h2>
     <p>请通过左侧菜单进行操作</p>
-    <div class="tips"> 点击 <span>商品管理</span> 管理商品 &nbsp;|&nbsp; 点击 <span>分类管理</span> 管理分类</div>
+    <div class="tips">📌 点击 <span>商品管理</span> 管理商品 &nbsp;|&nbsp; 点击 <span>分类管理</span> 管理分类</div>
 </div>
+
+<!-- ★★★ 关键修复：页面加载时主动检查登录状态 ★★★ -->
+<script>
+    (function() {
+        // 1. 页面加载时立即检查登录状态
+        function checkLogin() {
+            fetch('/index', { method: 'HEAD' })
+                .then(response => {
+                    // 如果返回 401/403，说明未登录
+                    if (response.status === 401 || response.status === 403) {
+                        window.top.location.href = '/login';
+                    }
+                })
+                .catch(() => {
+                    window.top.location.href = '/login';
+                });
+        }
+
+        // 立即执行
+        checkLogin();
+
+        // 2. 从 bfcache 恢复时强制刷新
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // 3. 页面可见性变化时再次检查（用户从其他标签页切回来）
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkLogin();
+            }
+        });
+    })();
+</script>
 </body>
 </html>

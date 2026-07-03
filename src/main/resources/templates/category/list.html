@@ -11,6 +11,7 @@
         .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
         .toolbar h2 { font-size:20px; color:#1e2a3a; border-left:4px solid #2c6bff; padding-left:12px; }
         .btn-add { padding:7px 18px; background:#27ae60; color:#fff; border-radius:6px; text-decoration:none; font-size:13px; }
+        .btn-add:hover { background:#1e8449; }
 
         .table-wrap { background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
         table { width:100%; border-collapse:collapse; font-size:13px; }
@@ -19,6 +20,35 @@
         .action-link { color:#2c6bff; text-decoration:none; margin-right:10px; }
         .action-link.danger { color:#e74c3c; }
 
+        /* 列宽 */
+        .col-seq { width:10%; text-align:center; }
+        .col-name { width:30%; }
+        .col-desc { width:35%; }
+        .col-action { width:25%; }
+
+        .pagination {
+            display:flex;
+            flex-wrap:wrap;
+            gap:5px;
+            align-items:center;
+            padding:14px 18px;
+            background:#fafbfc;
+            border-top:1px solid #eef0f4;
+        }
+        .pagination a {
+            padding:5px 12px;
+            border:1px solid #d9dfe8;
+            border-radius:5px;
+            text-decoration:none;
+            color:#3d4a5c;
+            font-size:13px;
+        }
+        .pagination a:hover { background:#eef2f7; }
+        .pagination a.active { background:#2c3e50; color:#fff; border-color:#2c3e50; }
+        .pagination a.disabled { color:#b0b8c4; pointer-events:none; }
+        .pagination .info { color:#8896a8; font-size:13px; margin-left:10px; }
+
+        /* 删除弹窗 */
         .modal-overlay {
             display:none; position:fixed; top:0; left:0; right:0; bottom:0;
             background:rgba(0,0,0,0.4); z-index:999;
@@ -48,25 +78,50 @@
 
 <div class="table-wrap">
     <table>
-        <thead><tr><th>ID</th><th>名称</th><th>描述</th><th>操作</th></tr></thead>
+        <thead>
+        <tr>
+            <th class="col-seq">序号</th>
+            <th class="col-name">名称</th>
+            <th class="col-desc">描述</th>
+            <th class="col-action">操作</th>
+        </tr>
+        </thead>
         <tbody>
-        <tr th:each="c : ${categories}">
-            <td th:text="${c.id}"></td>
-            <td th:text="${c.name}"></td>
-            <td th:text="${c.descp}"></td>
-            <td>
+        <tr th:each="c, stat : ${pageInfo.list}">
+            <!-- ★★★ 跨页连续序号 ★★★ -->
+            <td class="col-seq" th:text="${pageInfo.startRow + stat.index}"></td>
+            <td class="col-name" th:text="${c.name}"></td>
+            <td class="col-desc" th:text="${c.descp}"></td>
+            <td class="col-action">
                 <a class="action-link" th:href="@{/category/edit/{id}(id=${c.id})}">编辑</a>
-                <!-- ★★★ 修复后的删除按钮 ★★★ -->
                 <a class="action-link danger" th:onclick="'showDeleteModal(\'/category/delete/' + ${c.id} + '\')'">删除</a>
             </td>
         </tr>
-        <tr th:if="${categories == null or categories.isEmpty()}">
+        <tr th:if="${pageInfo.list == null or pageInfo.list.isEmpty()}">
             <td colspan="4" style="text-align:center;color:#8896a8;padding:40px 0;">暂无分类数据</td>
         </tr>
         </tbody>
     </table>
+
+    <!-- ★★★ 分页组件 ★★★ -->
+    <div class="pagination" th:if="${pageInfo.list != null and !pageInfo.list.isEmpty()}">
+        <a th:classappend="${pageInfo.pageNum == 1} ? 'disabled' : ''"
+           th:href="@{/category/list(pageNum=1)}">首页</a>
+        <a th:classappend="${!pageInfo.hasPreviousPage} ? 'disabled' : ''"
+           th:href="@{/category/list(pageNum=${pageInfo.prePage})}">上一页</a>
+        <a th:each="i : ${#numbers.sequence(1, pageInfo.pages)}"
+           th:classappend="${i == pageInfo.pageNum} ? 'active' : ''"
+           th:href="@{/category/list(pageNum=${i})}"
+           th:text="${i}"></a>
+        <a th:classappend="${!pageInfo.hasNextPage} ? 'disabled' : ''"
+           th:href="@{/category/list(pageNum=${pageInfo.nextPage})}">下一页</a>
+        <a th:classappend="${pageInfo.pageNum == pageInfo.pages} ? 'disabled' : ''"
+           th:href="@{/category/list(pageNum=${pageInfo.pages})}">尾页</a>
+        <span class="info">共 <span th:text="${pageInfo.total}"></span> 条</span>
+    </div>
 </div>
 
+<!-- 删除确认弹窗 -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal-confirm">
         <div class="icon">⚠️</div>
@@ -86,5 +141,6 @@
     function confirmDelete() { if (deleteUrl) window.location.href = deleteUrl; }
     document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
 </script>
+
 </body>
 </html>

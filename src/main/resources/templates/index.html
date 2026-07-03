@@ -3,6 +3,9 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>智慧商品信息管理系统</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -51,5 +54,46 @@
 <div class="content">
     <iframe name="mainFrame" src="/welcome"></iframe>
 </div>
+
+<script>
+    // ★★★ 终极方案：检测页面加载类型 ★★★
+    (function() {
+        // 如果页面是通过前进/后退加载的（type === 2）
+        if (window.performance && window.performance.navigation) {
+            if (window.performance.navigation.type === 2) {
+                // 强制跳转到登录页，并携带 expired 参数
+                window.location.href = '/login?expired=true';
+                return;
+            }
+        }
+
+        // 页面加载时检查登录状态
+        function checkLogin() {
+            fetch('/index', { method: 'HEAD' })
+                .then(response => {
+                    if (response.status === 401 || response.status === 403) {
+                        window.location.href = '/login';
+                    }
+                })
+                .catch(() => {
+                    window.location.href = '/login';
+                });
+        }
+
+        // 从 bfcache 恢复时强制刷新
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // 页面重新可见时检查
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkLogin();
+            }
+        });
+    })();
+</script>
 </body>
 </html>

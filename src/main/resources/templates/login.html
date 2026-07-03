@@ -2,6 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智慧商品管理系统 - 登录</title>
     <style>
@@ -148,5 +151,15 @@
         默认账号 admin / 密码 123456
     </div>
 </div>
+
+<!-- ★★★ 禁用 bfcache 缓存 ★★★ -->
+<script>
+    // 从 bfcache 恢复时强制刷新
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+</script>
 </body>
 </html>

@@ -22,14 +22,16 @@ public class SecurityConfig {
         http
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.disable())
+                        .addHeaderWriter((request, response) -> {
+                            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, private");
+                            response.setHeader("Pragma", "no-cache");
+                            response.setHeader("Expires", "0");
+                        })
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // 静态资源和登录/注册页面放行
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/login", "/register").permitAll()
-                        // 商品管理相关操作需要管理员角色
                         .requestMatchers("/product/add", "/product/edit/**", "/product/delete/**",
                                 "/category/**").hasRole("admin")
-                        // 其他请求需要认证
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -42,6 +44,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .csrf(csrf -> csrf.disable());
+
         return http.build();
     }
 }
