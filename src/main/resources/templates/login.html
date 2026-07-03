@@ -106,13 +106,6 @@
             border: 1px solid #c8f0d6;
             text-align: center;
         }
-        .footer {
-            margin-top: 24px;
-            color: #8896a8;
-            font-size: 13px;
-            border-top: 1px solid #edf2f7;
-            padding-top: 18px;
-        }
         .btn-register-link {
             display: inline-block;
             margin-top: 15px;
@@ -146,13 +139,8 @@
     </form>
 
     <a class="btn-register-link" th:href="@{/register}">还没有账号？立即注册</a>
-
-    <div class="footer">
-        默认账号 admin / 密码 123456
-    </div>
 </div>
 
-<!-- ★★★ 禁用 bfcache 缓存 ★★★ -->
 <script>
     // 从 bfcache 恢复时强制刷新
     window.addEventListener('pageshow', function(event) {
