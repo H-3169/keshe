@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>分类管理</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Microsoft YaHei',Arial,sans-serif; background:#f0f2f5; padding:20px; }
+
+        .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+        .toolbar h2 { font-size:20px; color:#1e2a3a; border-left:4px solid #2c6bff; padding-left:12px; }
+        .btn-add { padding:7px 18px; background:#27ae60; color:#fff; border-radius:6px; text-decoration:none; font-size:13px; }
+
+        .table-wrap { background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        table th { background:#f7f9fc; padding:12px 14px; text-align:left; font-weight:600; border-bottom:2px solid #e4e7ec; }
+        table td { padding:12px 14px; border-bottom:1px solid #eef0f4; vertical-align:middle; }
+        .action-link { color:#2c6bff; text-decoration:none; margin-right:10px; }
+        .action-link.danger { color:#e74c3c; }
+
+        .modal-overlay {
+            display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+            background:rgba(0,0,0,0.4); z-index:999;
+            justify-content:center; align-items:center;
+        }
+        .modal-overlay.show { display:flex; }
+        .modal-confirm {
+            background:#fff; border-radius:12px; padding:30px 40px 25px;
+            width:380px; max-width:92%; text-align:center;
+            box-shadow:0 20px 60px rgba(0,0,0,0.25);
+        }
+        .modal-confirm .icon { font-size:48px; margin-bottom:10px; }
+        .modal-confirm h3 { font-size:18px; color:#1e2a3a; }
+        .modal-confirm p { font-size:14px; color:#8896a8; margin-bottom:20px; }
+        .modal-confirm .btn-confirm { padding:8px 30px; background:#e74c3c; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+        .modal-confirm .btn-confirm:hover { background:#c0392b; }
+        .modal-confirm .btn-cancel { padding:8px 24px; background:#eef0f4; color:#3d4a5c; border:none; border-radius:6px; cursor:pointer; margin-left:8px; }
+        .modal-confirm .btn-cancel:hover { background:#d9dfe8; }
+    </style>
+</head>
+<body>
+
+<div class="toolbar">
+    <h2>📂 分类管理</h2>
+    <a class="btn-add" th:href="@{/category/add}">＋ 添加分类</a>
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead><tr><th>ID</th><th>名称</th><th>描述</th><th>操作</th></tr></thead>
+        <tbody>
+        <tr th:each="c : ${categories}">
+            <td th:text="${c.id}"></td>
+            <td th:text="${c.name}"></td>
+            <td th:text="${c.descp}"></td>
+            <td>
+                <a class="action-link" th:href="@{/category/edit/{id}(id=${c.id})}">编辑</a>
+                <!-- ★★★ 修复后的删除按钮 ★★★ -->
+                <a class="action-link danger" th:onclick="'showDeleteModal(\'/category/delete/' + ${c.id} + '\')'">删除</a>
+            </td>
+        </tr>
+        <tr th:if="${categories == null or categories.isEmpty()}">
+            <td colspan="4" style="text-align:center;color:#8896a8;padding:40px 0;">暂无分类数据</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-confirm">
+        <div class="icon">⚠️</div>
+        <h3>确认删除</h3>
+        <p>确定要删除该分类吗？<br>删除后无法恢复！</p>
+        <div>
+            <button class="btn-confirm" onclick="confirmDelete()">确定删除</button>
+            <button class="btn-cancel" onclick="closeDeleteModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let deleteUrl = '';
+    function showDeleteModal(url) { deleteUrl = url; document.getElementById('deleteModal').classList.add('show'); }
+    function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
+    function confirmDelete() { if (deleteUrl) window.location.href = deleteUrl; }
+    document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
+</script>
+</body>
+</html>

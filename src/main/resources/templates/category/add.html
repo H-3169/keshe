@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>添加分类</title>
+    <style>
+        body { font-family:'Microsoft YaHei',Arial,sans-serif; background:#f0f2f5; padding:30px; }
+        .box { max-width:500px; margin:0 auto; background:#fff; padding:30px; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+        h2 { border-left:4px solid #2c6bff; padding-left:12px; }
+        .form-group { margin-bottom:14px; }
+        label { display:block; font-weight:500; color:#3d4a5c; margin-bottom:4px; }
+        input[type="text"] { width:100%; padding:8px 12px; border:1px solid #d9dfe8; border-radius:6px; font-size:14px; }
+        .btn { padding:8px 24px; background:#2c6bff; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+        .btn:hover { background:#1a56d9; }
+        .back { margin-left:10px; color:#8896a8; text-decoration:none; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>添加分类</h2>
+    <form th:action="@{/category/add}" method="post">
+        <div class="form-group">
+            <label>名称</label>
+            <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+            <label>描述</label>
+            <input type="text" name="descp">
+        </div>
+        <button class="btn" type="submit">添加</button>
+        <a class="back" th:href="@{/category/list}">返回</a>
+    </form>
+</div>
+</body>
+</html>

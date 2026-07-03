@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { height:100vh; display:flex; justify-content:center; align-items:center; background:#f5f7fa; font-family:'Microsoft YaHei',Arial,sans-serif; }
+        .register-container { background:#fff; padding:48px 40px 40px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); width:380px; max-width:92%; text-align:center; border:1px solid #e8ecf1; }
+        .register-container h2 { margin-bottom:32px; color:#1e2a3a; font-size:26px; }
+        .register-container h2 span { color:#2c6bff; }
+        .form-group { margin-bottom:22px; text-align:left; }
+        .form-group label { display:block; font-weight:500; color:#3d4a5c; margin-bottom:6px; font-size:14px; }
+        .form-group input { width:100%; padding:12px 14px; border:1px solid #d9dfe8; border-radius:8px; font-size:15px; outline:none; background:#fafbfc; }
+        .form-group input:focus { border-color:#2c6bff; }
+        .btn-register { width:100%; padding:13px; background:#27ae60; border:none; border-radius:8px; color:#fff; font-size:17px; font-weight:600; cursor:pointer; }
+        .btn-register:hover { background:#1e8449; }
+        .btn-login-link { display:inline-block; margin-top:15px; color:#2c6bff; text-decoration:none; font-size:14px; }
+        .btn-login-link:hover { text-decoration:underline; }
+        .error-msg { color:#d32f2f; background:#fef2f2; padding:10px; border-radius:6px; margin-bottom:18px; font-size:14px; border:1px solid #fde2e2; }
+        .success-msg { color:#0f7b3a; background:#eafcf1; padding:10px; border-radius:6px; margin-bottom:18px; font-size:14px; border:1px solid #c8f0d6; }
+        .footer { margin-top:20px; color:#8896a8; font-size:13px; border-top:1px solid #edf2f7; padding-top:18px; }
+    </style>
+</head>
+<body>
+<div class="register-container">
+    <h2>用户<span>注册</span></h2>
+
+    <form th:action="@{/register}" method="post">
+        <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+        <div th:if="${success}" class="success-msg" th:text="${success}"></div>
+
+        <div class="form-group">
+            <label>用户名</label>
+            <input type="text" name="username" placeholder="请输入用户名" required>
+        </div>
+        <div class="form-group">
+            <label>密码</label>
+            <input type="password" name="password" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="btn-register">注 册</button>
+    </form>
+
+    <a class="btn-login-link" th:href="@{/login}">已有账号？立即登录</a>
+    <div class="footer">默认管理员 admin / 密码 123456</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>商品管理</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'Microsoft YaHei',Arial,sans-serif;
+            background:#f0f2f5;
+            padding:20px;
+            min-height: auto;
+            height: auto;
+        }
+
+        .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+        .toolbar h2 { font-size:20px; color:#1e2a3a; border-left:4px solid #2c6bff; padding-left:12px; }
+        .btn-add { padding:7px 18px; background:#27ae60; color:#fff; border-radius:6px; text-decoration:none; font-size:13px; }
+        .btn-add:hover { background:#1e8449; }
+
+        .search-form {
+            background:#fff; padding:12px 16px; border-radius:8px;
+            display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+            box-shadow:0 1px 4px rgba(0,0,0,0.06); margin-bottom:16px;
+        }
+        .search-form input, .search-form select {
+            padding:7px 12px; border:1px solid #d9dfe8; border-radius:6px;
+            font-size:13px; outline:none; background:#fafbfc;
+        }
+        .search-form input:focus, .search-form select:focus { border-color:#2c6bff; }
+        .search-form input[type="number"] { width:100px; }
+        .search-form .btn-search { padding:7px 20px; background:#2c3e50; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+        .search-form .btn-search:hover { background:#1a2a3a; }
+        .search-form .btn-reset { padding:7px 16px; background:transparent; color:#8896a8; border:1px solid #d9dfe8; border-radius:6px; cursor:pointer; text-decoration:none; }
+        .search-form .btn-reset:hover { background:#f0f2f5; }
+
+        .table-wrap {
+            background:#fff;
+            border-radius:10px;
+            overflow-x:auto;
+            box-shadow:0 1px 4px rgba(0,0,0,0.06);
+        }
+        table {
+            width:100%;
+            table-layout:fixed;
+            border-collapse:collapse;
+            font-size:13px;
+        }
+        table th {
+            background:#f7f9fc;
+            padding:12px 10px;
+            text-align:left;
+            font-weight:600;
+            border-bottom:2px solid #e4e7ec;
+            white-space:nowrap;
+        }
+        table td {
+            padding:12px 10px;
+            border-bottom:1px solid #eef0f4;
+            vertical-align:middle;
+            word-break:break-word;
+        }
+        table tr:hover { background:#f8f9fc; }
+        table img { width:44px; height:44px; object-fit:cover; border-radius:6px; background:#f0f2f5; }
+        .price { color:#e74c3c; font-weight:600; }
+        .action-link { color:#2c6bff; text-decoration:none; margin-right:8px; }
+        .action-link:hover { text-decoration:underline; }
+        .action-link.danger { color:#e74c3c; }
+
+        /* 列宽分配：序号→名称→图片→分类→价格→日期→简介→操作 */
+        .col-seq { width:6%; text-align:center; }
+        .col-name { width:16%; }
+        .col-img { width:8%; text-align:center; }
+        .col-cate { width:11%; }
+        .col-price { width:10%; }
+        .col-date { width:12%; }
+        .col-desc { width:20%; overflow:visible; text-overflow:clip; white-space:normal; word-break:break-word; line-height:1.5; }
+        .col-action { width:12%; }
+
+        .pagination {
+            display:flex;
+            flex-wrap:wrap;
+            gap:5px;
+            align-items:center;
+            padding:14px 18px;
+            background:#fafbfc;
+            border-top:1px solid #eef0f4;
+        }
+        .pagination a {
+            padding:5px 12px;
+            border:1px solid #d9dfe8;
+            border-radius:5px;
+            text-decoration:none;
+            color:#3d4a5c;
+            font-size:13px;
+        }
+        .pagination a:hover { background:#eef2f7; }
+        .pagination a.active { background:#2c3e50; color:#fff; border-color:#2c3e50; }
+        .pagination a.disabled { color:#b0b8c4; pointer-events:none; }
+        .pagination .info { color:#8896a8; font-size:13px; margin-left:10px; }
+
+        .empty { text-align:center; color:#8896a8; padding:40px 0; }
+
+        .modal-overlay {
+            display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+            background:rgba(0,0,0,0.4); z-index:999;
+            justify-content:center; align-items:center;
+        }
+        .modal-overlay.show { display:flex; }
+        .modal-confirm {
+            background:#fff; border-radius:12px; padding:30px 40px 25px;
+            width:380px; max-width:92%; text-align:center;
+            box-shadow:0 20px 60px rgba(0,0,0,0.25);
+        }
+        .modal-confirm .icon { font-size:48px; margin-bottom:10px; }
+        .modal-confirm h3 { font-size:18px; color:#1e2a3a; }
+        .modal-confirm p { font-size:14px; color:#8896a8; margin-bottom:20px; }
+        .modal-confirm .btn-confirm { padding:8px 30px; background:#e74c3c; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+        .modal-confirm .btn-confirm:hover { background:#c0392b; }
+        .modal-confirm .btn-cancel { padding:8px 24px; background:#eef0f4; color:#3d4a5c; border:none; border-radius:6px; cursor:pointer; margin-left:8px; }
+        .modal-confirm .btn-cancel:hover { background:#d9dfe8; }
+    </style>
+</head>
+<body>
+
+<div class="toolbar">
+    <h2>📦 商品管理</h2>
+    <div sec:authorize="hasRole('ROLE_admin')">
+        <a class="btn-add" th:href="@{/product/add}">＋ 添加商品</a>
+    </div>
+</div>
+
+<!-- 搜索表单 -->
+<form class="search-form" th:action="@{/product/list}" method="get">
+    <input type="text" name="keyword" th:value="${keyword}" placeholder="商品名称">
+    <select name="catId">
+        <option value="">全部分类</option>
+        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${catId == c.id}"></option>
+    </select>
+    <input type="number" name="minPrice" th:value="${minPrice}" placeholder="最低价">
+    <span>—</span>
+    <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="最高价">
+    <button class="btn-search" type="submit">搜索</button>
+    <a class="btn-reset" th:href="@{/product/list}">重置</a>
+</form>
+
+<!-- 表格 -->
+<div class="table-wrap">
+    <table>
+        <colgroup>
+            <col class="col-seq">
+            <col class="col-name">
+            <col class="col-img">
+            <col class="col-cate">
+            <col class="col-price">
+            <col class="col-date">
+            <col class="col-desc">
+            <col class="col-action" sec:authorize="hasRole('ROLE_admin')">
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="col-seq">序号</th>
+            <th class="col-name">商品名称</th>
+            <th class="col-img">图片</th>
+            <th class="col-cate">分类</th>
+            <th class="col-price">价格</th>
+            <th class="col-date">发布日期</th>
+            <th class="col-desc">简介</th>
+            <th class="col-action" sec:authorize="hasRole('ROLE_admin')">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p, stat : ${pageInfo.list}">
+            <td class="col-seq" th:text="${pageInfo.startRow + stat.index}"></td>
+            <td class="col-name" th:text="${p.name}"></td>
+            <td class="col-img"><img th:src="${p.photoUrl}" alt="图片"></td>
+            <td class="col-cate"><span th:text="${p.categoryName}" style="background:#eef2f7;padding:2px 12px;border-radius:12px;font-size:12px;"></span></td>
+            <td class="col-price"><span class="price">￥<span th:text="${p.price}"></span></span></td>
+            <td class="col-date" th:text="${p.releaseDate != null ? #dates.format(p.releaseDate, 'yyyy-MM-dd') : '-'}"></td>
+            <td class="col-desc" th:text="${p.descp}"></td>
+            <td class="col-action" sec:authorize="hasRole('ROLE_admin')">
+                <a class="action-link" th:href="@{/product/edit/{id}(id=${p.id})}">编辑</a>
+                <a class="action-link danger" th:onclick="'showDeleteModal(\'/product/delete/' + ${p.id} + '\')'">删除</a>
+            </td>
+        </tr>
+        <tr th:if="${pageInfo.list == null or pageInfo.list.isEmpty()}">
+            <td colspan="8" class="empty">📭 暂无商品数据</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div class="pagination" th:if="${pageInfo.list != null and !pageInfo.list.isEmpty()}">
+        <a th:classappend="${pageInfo.pageNum == 1} ? 'disabled' : ''" th:href="@{/product/list(pageNum=1, keyword=${keyword}, catId=${catId}, minPrice=${minPrice}, maxPrice=${maxPrice})}">首页</a>
+        <a th:classappend="${!pageInfo.hasPreviousPage} ? 'disabled' : ''" th:href="@{/product/list(pageNum=${pageInfo.prePage}, keyword=${keyword}, catId=${catId}, minPrice=${minPrice}, maxPrice=${maxPrice})}">上一页</a>
+        <a th:each="i : ${#numbers.sequence(1, pageInfo.pages)}" th:classappend="${i == pageInfo.pageNum} ? 'active' : ''" th:href="@{/product/list(pageNum=${i}, keyword=${keyword}, catId=${catId}, minPrice=${minPrice}, maxPrice=${maxPrice})}" th:text="${i}"></a>
+        <a th:classappend="${!pageInfo.hasNextPage} ? 'disabled' : ''" th:href="@{/product/list(pageNum=${pageInfo.nextPage}, keyword=${keyword}, catId=${catId}, minPrice=${minPrice}, maxPrice=${maxPrice})}">下一页</a>
+        <a th:classappend="${pageInfo.pageNum == pageInfo.pages} ? 'disabled' : ''" th:href="@{/product/list(pageNum=${pageInfo.pages}, keyword=${keyword}, catId=${catId}, minPrice=${minPrice}, maxPrice=${maxPrice})}">尾页</a>
+        <span class="info">共 <span th:text="${pageInfo.total}"></span> 条</span>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-confirm">
+        <div class="icon">⚠️</div>
+        <h3>确认删除</h3>
+        <p>确定要删除该商品吗？<br>删除后无法恢复！</p>
+        <div>
+            <button class="btn-confirm" onclick="confirmDelete()">确定删除</button>
+            <button class="btn-cancel" onclick="closeDeleteModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let deleteUrl = '';
+    function showDeleteModal(url) { deleteUrl = url; document.getElementById('deleteModal').classList.add('show'); }
+    function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
+    function confirmDelete() { if (deleteUrl) window.location.href = deleteUrl; }
+    document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
+</script>
+
+</body>
+</html>
